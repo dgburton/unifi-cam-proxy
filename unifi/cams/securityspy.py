@@ -19,8 +19,6 @@ class SecuritySpyCam(UnifiCamBase):
     @classmethod
     def add_parser(cls, parser: argparse.ArgumentParser) -> None:
         super().add_parser(parser)
-        parser.add_argument("--username", "-u", required=True, help="SecuritySpy username")
-        parser.add_argument("--password", "-p", required=True, help="SecuritySpy password")
         parser.add_argument("--cameranumber", "-c", required=True, help="SecuritySpy camera number")
 
     async def get_snapshot(self) -> Path:
