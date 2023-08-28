@@ -58,31 +58,38 @@ class SecuritySpyCam(UnifiCamBase):
                 k = str(list(updated.keys())[0])
                 obj = updated[k]
 
-                if "event_object" in obj and "event_type" in obj and "event_on" in obj:
-                    if obj["event_type"] == "motion":
+                if "event_object" in obj and "event_type" in obj and "event_on" in obj and "live_stream" in obj:
+                    # does the event relate to our camera number?
+                    if f"&cameraNum={int(self.args.cameranumber)}&" in obj["live_stream"]:
+                        if obj["event_type"] == "motion":
 
-                        object_type = None
-                        if obj["event_type"] == "Human":
-                            object_type = SmartDetectObjectType.PERSON
-                        elif obj["event_type"] == "Vehicle":
-                            object_type = SmartDetectObjectType.VEHICLE
-                        elif obj["event_type"] == "Animal":
-                            object_type = SmartDetectObjectType.ANIMAL
+                            object_type = None
+                            if obj["event_object"] == "Human":
+                                object_type = SmartDetectObjectType.PERSON
+                            elif obj["event_object"] == "Vehicle":
+                                object_type = SmartDetectObjectType.VEHICLE
+                            elif obj["event_object"] == "Animal":
+                                object_type = SmartDetectObjectType.PERSON # we don't have the "animal" type defined as Unifi doesn't support it, so we'll treat them as just vanilla "motion" events
 
-                        if object_type != None:
-                            if obj["event_on"] == True:
-                                if not self.motion_in_progress:
-                                    self.motion_in_progress = True
-                                    self.logger.info(f"Trigger motion start {object_type}")
-                                    self.trigger_motion_start(object_type)
+                            if object_type != None:
+                                if obj["event_on"] == True:
+                                    if not self.motion_in_progress:
+                                        self.motion_in_progress = True
+                                        self.logger.info(f"Trigger motion start {object_type}")
+                                        loop = asyncio.get_running_loop()
+                                        if obj["event_object"] == "Animal":
+                                            tsk = loop.create_task(self.trigger_motion_start())
+                                        else:
+                                            tsk = loop.create_task(self.trigger_motion_start(object_type))
                             elif obj["event_on"] == False:
                                 if self.motion_in_progress:
                                     self.motion_in_progress = False
                                     self.logger.info(f"Trigger motion end {object_type}")
-                                    self.trigger_motion_stop()
+                                    loop = asyncio.get_running_loop()
+                                    tsk = loop.create_task(self.trigger_motion_stop())
 
-                        #self.logger.info("* * * * * * * Event object=%s", obj)
-                        #self.logger.info(f"* * Event time:{updated['0']['event_start']} type:{updated['0']['event_type']} active:{updated['0']['event_on']}")
+                            #self.logger.info("* * * * * * * Event object=%s", obj)
+                            #self.logger.info(f"* * Event time:{updated['0']['event_start']} type:{updated['0']['event_type']} active:{updated['0']['event_on']}")
 
             await secspy.update()
             unsub = secspy.subscribe_websocket(subscriber)

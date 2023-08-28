@@ -26,7 +26,6 @@ AVClientRequest = AVClientResponse = dict[str, Any]
 class SmartDetectObjectType(Enum):
     PERSON = "person"
     VEHICLE = "vehicle"
-    ANIMAL = "animal"
 
 
 class UnifiCamBase(metaclass=ABCMeta):
