@@ -12,4 +12,5 @@ __all__ = [
     "RTSPCam",
     "Reolink",
     "ReolinkNVRCam",
+    "SecuritySpyCam",
 ]
