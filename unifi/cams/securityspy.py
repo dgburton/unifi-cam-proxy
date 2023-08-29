@@ -102,3 +102,8 @@ class SecuritySpyCam(UnifiCamBase):
             await secspy.async_disconnect_ws()
             unsub()
 
+    #def get_extra_ffmpeg_args(self, stream_index: str) -> str:
+    #    return (
+    #        "-ar 32000 -ac 1 -codec:a aac -b:a 32k -c:v copy -vbsf"
+    #        f' "h264_metadata=tick_rate=50000/1001:fixed_frame_rate_flag=1"'
+    #    )
